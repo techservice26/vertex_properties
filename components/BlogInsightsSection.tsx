@@ -11,16 +11,14 @@ const posts = [
 			'Professional home maintenance solutions designed to improve comfort, safety, and long-term value.',
 	},
 	{
-		image:
-			'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?ixlib=rb-4.0.3&auto=format&fit=crop&w=900&q=80',
+		image: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?ixlib=rb-4.0.3&auto=format&fit=crop&w=900&q=80',
 		date: 'February 2, 2026',
 		title: 'Advanced Plumbing Repairs Engineered to Last',
 		description:
 			'Professional plumbing services designed to ensure efficient flow, safety, and long-lasting system performance.',
 	},
 	{
-		image:
-			'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?ixlib=rb-4.0.3&auto=format&fit=crop&w=900&q=80',
+		image: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?ixlib=rb-4.0.3&auto=format&fit=crop&w=900&q=80',
 		date: 'September 15, 2025',
 		title: 'Kitchen Cabinet Installation Crafted with Precision',
 		description:

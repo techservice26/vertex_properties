@@ -1,15 +1,13 @@
 import Image from 'next/image';
 import { HiMapPin, HiPaperAirplane, HiPhone } from 'react-icons/hi2';
 
-const PHONE_MAIN = '(833) 763-5687';
-const PHONE_RAW = '+18337635687';
-const PHONE_ALT = '(718) 555-0192';
-const PHONE_ALT_RAW = '+17185550192';
-const EMAIL = 'support@vertexpropertyservices.com';
+const PHONE_MAIN = '(213) 444-4151';
+const PHONE_RAW = '+12134444151';
+const WEBSITE = 'vertexproperties.us';
 
 const ADDRESSES = [
-	'200-00 Hollis Ave, Hollis, NY 11423',
-	'180-00 Hillside Ave, Hollis, NY 11423',
+	'9228 195TH PLACE',
+	'FLOOR 3 Hollis, NO 11423',
 ];
 
 function IconCircle({ children }: { children: React.ReactNode }) {
@@ -55,12 +53,6 @@ export default function ContactDetailsSection() {
 										>
 											{PHONE_MAIN}
 										</a>
-										<a
-											href={`tel:${PHONE_ALT_RAW}`}
-											className='font-medium text-[#475569] transition hover:text-[#c1272d]'
-										>
-											{PHONE_ALT}
-										</a>
 									</div>
 								</div>
 							</div>
@@ -75,13 +67,13 @@ export default function ContactDetailsSection() {
 								</IconCircle>
 								<div className='min-w-0 pt-0.5'>
 									<p className='text-xs font-bold uppercase tracking-wide text-[#64748b]'>
-										Email
+										Website
 									</p>
 									<a
-										href={`mailto:${EMAIL}`}
+										href={`https://${WEBSITE}`}
 										className='mt-1 block break-all text-sm font-semibold text-[#0f172a] transition hover:text-[#c1272d]'
 									>
-										{EMAIL}
+										{WEBSITE}
 									</a>
 								</div>
 							</div>

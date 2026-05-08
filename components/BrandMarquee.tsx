@@ -18,7 +18,7 @@ function MarqueeUnit({ suffix }: { suffix: string }) {
 						className='h-11 w-11 shrink-0 object-contain md:h-14 md:w-14'
 					/>
 					<span className='whitespace-nowrap font-sans text-base font-bold tracking-tight text-[#061a2f] md:text-lg'>
-						Vertex Property Services Inc
+						Vertex Property Services, Inc.
 					</span>
 				</div>
 			))}

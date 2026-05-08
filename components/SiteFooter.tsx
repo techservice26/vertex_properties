@@ -9,9 +9,8 @@ import {
 } from 'react-icons/fa6';
 import { HiEnvelope, HiMapPin, HiPhone } from 'react-icons/hi2';
 
-const PHONE_MAIN = '(833) 763-5687';
-const PHONE_RAW = '+18337635687';
-const PHONE_ALT = '(718) 555-0192';
+const PHONE_MAIN = '(213) 444-4151';
+const PHONE_RAW = '+12134444151';
 
 /** Hollow stroked headline (same pattern as Areas We Serve / Trusted Partners). */
 const OUTLINE_NAVY =
@@ -31,7 +30,7 @@ function MarqueeStrip({ suffix }: { suffix: string }) {
 						className='whitespace-nowrap font-sans text-[clamp(1.5rem,5vw,3.25rem)] font-black uppercase leading-none tracking-tight text-white'
 						style={{ textShadow: OUTLINE_NAVY }}
 					>
-						Vertex Property Services Inc <span aria-hidden>*</span>
+						Vertex Property Services, Inc. <span aria-hidden>*</span>
 					</span>
 				</span>
 			))}
@@ -63,7 +62,7 @@ export default function SiteFooter() {
 					>
 						<Image
 							src='/images/logo.png'
-							alt='Vertex Property Services Inc'
+							alt='Vertex Property Services, Inc.'
 							fill
 							className='object-contain object-center lg:object-left'
 							sizes='180px'
@@ -95,7 +94,7 @@ export default function SiteFooter() {
 							About Company
 						</h3>
 						<p className='mt-4 text-sm leading-relaxed text-[#64748b]'>
-							Vertex Property Services Inc delivers reliable
+							Vertex Property Services, Inc. delivers reliable
 							maintenance and preservation across residential and
 							commercial portfolios, with responsive crews and
 							clear reporting you can trust.
@@ -188,9 +187,9 @@ export default function SiteFooter() {
 									<HiMapPin className='h-5 w-5' aria-hidden />
 								</span>
 								<span className='leading-relaxed text-[#64748b]'>
-									200-00 Hollis Ave, Hollis, NY 11423
+									9228 195TH PLACE
 									<br />
-									180-00 Hillside Ave, Hollis, NY 11423
+									FLOOR 3 Hollis, NO 11423
 								</span>
 							</li>
 							<li className='flex gap-3'>
@@ -202,22 +201,10 @@ export default function SiteFooter() {
 								</span>
 								<span className='flex flex-col gap-1 leading-relaxed'>
 									<a
-										href='mailto:support@vertexpropertyservices.com'
+										href='https://vertexproperties.us'
 										className='text-[#64748b] transition hover:text-[#c1272d]'
 									>
-										support@vertexpropertyservices.com
-									</a>
-									<a
-										href='mailto:info@vertexpropertyservices.com'
-										className='text-[#64748b] transition hover:text-[#c1272d]'
-									>
-										info@vertexpropertyservices.com
-									</a>
-									<a
-										href='mailto:dispatch@vertexpropertyservices.com'
-										className='text-[#64748b] transition hover:text-[#c1272d]'
-									>
-										dispatch@vertexpropertyservices.com
+										vertexproperties.us
 									</a>
 								</span>
 							</li>
@@ -231,12 +218,6 @@ export default function SiteFooter() {
 										className='font-semibold text-[#0f172a] transition hover:text-[#c1272d]'
 									>
 										{PHONE_MAIN}
-									</a>
-									<a
-										href='tel:+17185550192'
-										className='text-[#64748b] transition hover:text-[#c1272d]'
-									>
-										{PHONE_ALT}
 									</a>
 								</span>
 							</li>
@@ -260,7 +241,7 @@ export default function SiteFooter() {
 			</div>
 
 			<div className='relative z-10 border-t border-[#e2e8f0] px-4 py-4 text-center text-xs text-[#94a3b8] sm:px-6'>
-				© {new Date().getFullYear()} Vertex Property Services Inc. All
+				© {new Date().getFullYear()} Vertex Property Services, Inc. All
 				rights reserved.
 			</div>
 		</footer>

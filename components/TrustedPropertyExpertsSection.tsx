@@ -2,8 +2,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import EmergencyServiceBanner from '@/components/EmergencyServiceBanner';
 
-const PHONE_DISPLAY = '(833) 763-5687';
-const PHONE_RAW = '+18337635687';
+const PHONE_DISPLAY = '(213) 444-4151';
+const PHONE_RAW = '+12134444151';
 
 export default function TrustedPropertyExpertsSection() {
 	return (
@@ -56,7 +56,7 @@ export default function TrustedPropertyExpertsSection() {
 								Safety for Homes, Families & Businesses.
 							</h2>
 							<p className='mt-5 max-w-xl font-sans text-base leading-relaxed text-[#64748b]'>
-								Vertex Property Services Inc provides reliable
+								Vertex Property Services, Inc. provides reliable
 								property maintenance, repair, and renovation
 								services for residential and commercial
 								properties. We are committed to delivering

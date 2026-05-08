@@ -576,7 +576,7 @@ export default function ScheduleVisitForm() {
 							)}
 
 							<p className='text-xs leading-relaxed text-[#64748b]'>
-								You authorize Vertex Property Services Inc to
+								You authorize Vertex Property Services, Inc. to
 								charge the payment method above for the deposit
 								total shown, and for any future charges
 								associated with completed work, in accordance
@@ -655,7 +655,7 @@ export default function ScheduleVisitForm() {
 						<p className='mx-auto mt-6 max-w-xl text-center text-xs leading-relaxed text-[#64748b] sm:text-sm'>
 							Final quotes are based on time and materials
 							observed on site. Your deposit is applied toward
-							approved work. Vertex Property Services Inc is not
+							approved work. Vertex Property Services, Inc. is not
 							liable for pre-existing conditions discovered after
 							inspection.
 						</p>

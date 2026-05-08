@@ -2,8 +2,8 @@ import Link from 'next/link';
 import { HiMagnifyingGlass, HiPhone } from 'react-icons/hi2';
 import { LuCalculator } from 'react-icons/lu';
 
-const PHONE_DISPLAY = '(833) 763-5687';
-const PHONE_RAW = '+18337635687';
+const PHONE_DISPLAY = '(213) 444-4151';
+const PHONE_RAW = '+12134444151';
 
 export default function ProjectsPageCtaBar() {
 	return (

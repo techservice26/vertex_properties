@@ -7,8 +7,8 @@ import {
 } from 'react-icons/hi2';
 import { LuCalculator } from 'react-icons/lu';
 
-const PHONE_DISPLAY = '(833) 763-5687';
-const PHONE_RAW = '+18337635687';
+const PHONE_DISPLAY = '(213) 444-4151';
+const PHONE_RAW = '+12134444151';
 
 const PROFESSIONAL_BG = '/images/professional_bg.png';
 
@@ -38,7 +38,7 @@ export default function ProfessionalCtaSection() {
 							guaranteed quality workmanship.
 						</h2>
 						<p className='mt-4 max-w-2xl font-sans text-sm leading-relaxed text-white/95 sm:text-base md:text-lg'>
-							Welcome to Vertex Property Services Inc — your
+							Welcome to Vertex Property Services, Inc. — your
 							trusted partner in quality craftsmanship. Get your
 							free estimate today!
 						</p>

@@ -27,7 +27,7 @@ export default function AboutUsSection() {
 					About Us
 				</h2>
 				<p className='mt-5 font-sans text-base leading-relaxed text-[#475569] md:text-lg'>
-					Vertex Property Services Inc focuses on property
+					Vertex Property Services, Inc. focuses on property
 					preservation and maintenance so owners and managers can
 					protect value, stay compliant, and keep buildings running
 					without juggling dozens of contractors. We combine field

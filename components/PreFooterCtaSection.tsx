@@ -2,8 +2,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { HiPhone } from 'react-icons/hi2';
 
-const PHONE_DISPLAY = '(833) 763-5687';
-const PHONE_RAW = '+18337635687';
+const PHONE_DISPLAY = '(213) 444-4151';
+const PHONE_RAW = '+12134444151';
 const BG = '/images/professional_bg.png';
 const OVERLAY = '/images/hero_overlay.png';
 
@@ -51,10 +51,10 @@ export default function PreFooterCtaSection() {
 									we keep every property running smoothly.
 								</p>
 								<Link
-									href='mailto:info@vertexpropertyservices.com'
+									href='https://vertexproperties.us'
 									className='mt-6 inline-flex w-full items-center justify-center rounded-full bg-[#c1272d] px-6 py-3.5 font-sans text-sm font-bold text-white shadow-md transition hover:bg-[#a61f29] sm:w-auto'
 								>
-									Email Us
+									Visit Website
 								</Link>
 							</div>
 						</div>
@@ -62,7 +62,7 @@ export default function PreFooterCtaSection() {
 						<div className='relative z-20 flex h-[100px] w-[100px] shrink-0 items-center justify-center rounded-full border-4 border-white bg-white shadow-[0_8px_30px_rgba(15,23,42,0.15)] sm:h-[112px] sm:w-[112px] lg:h-[120px] lg:w-[120px] lg:border-[5px]'>
 							<Image
 								src='/images/vertex_property_infinity_loop.svg'
-								alt='Vertex Property Services'
+								alt='Vertex Property Services, Inc.'
 								width={72}
 								height={72}
 								className='h-14 w-14 object-contain sm:h-16 sm:w-16'

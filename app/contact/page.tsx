@@ -31,7 +31,7 @@ export default function ContactPage() {
 
 			<section className='px-4 pb-12 sm:px-6 sm:pb-14 lg:pb-16'>
 				<div className='mx-auto max-w-5xl'>
-					<EmergencyServiceBanner requestHref='tel:+18337635687' />
+					<EmergencyServiceBanner requestHref='tel:+12134444151' />
 				</div>
 			</section>
 			<AreasWeServeSection />

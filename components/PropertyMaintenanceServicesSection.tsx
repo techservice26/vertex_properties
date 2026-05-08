@@ -1,10 +1,6 @@
 import Link from 'next/link';
 import type { IconType } from 'react-icons';
-import {
-	HiArrowRight,
-	HiChevronLeft,
-	HiChevronRight,
-} from 'react-icons/hi2';
+import { HiArrowRight, HiChevronLeft, HiChevronRight } from 'react-icons/hi2';
 import {
 	MdOutlineBolt,
 	MdOutlineCleaningServices,
@@ -149,7 +145,10 @@ export default function PropertyMaintenanceServicesSection() {
 									className='mt-3 inline-flex items-center gap-1 text-xs font-bold uppercase tracking-wide text-[#c1272d] transition hover:text-[#a61f29]'
 								>
 									EXPLORE SERVICE
-									<HiArrowRight className='h-4 w-4' aria-hidden />
+									<HiArrowRight
+										className='h-4 w-4'
+										aria-hidden
+									/>
 								</Link>
 							</article>
 						</li>

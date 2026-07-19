@@ -189,7 +189,7 @@ export default function SiteFooter() {
                                 <span className='leading-relaxed text-[#64748b]'>
                                     9228 195TH PLACE
                                     <br />
-                                    FLOOR 3 Hollis, NO 11423
+                                    FLOOR 3 Hollis, NY 11423
                                 </span>
                             </li>
                             <li className='flex gap-3'>

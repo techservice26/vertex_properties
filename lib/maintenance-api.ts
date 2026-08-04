@@ -58,6 +58,16 @@ export async function deleteMaintenanceTutorial(id: number) {
 	});
 }
 
+export async function toggleMaintenanceTutorialHomepage(
+	id: number,
+	showOnHomepage: boolean,
+) {
+	return apiFetch<MaintenanceTutorial>(`${TUTORIALS_PATH}${id}/`, {
+		method: 'PATCH',
+		body: JSON.stringify({ show_on_homepage: showOnHomepage }),
+	});
+}
+
 function buildFormData(input: MaintenanceTutorialInput) {
 	const formData = new FormData();
 	formData.append('title', input.title.trim());

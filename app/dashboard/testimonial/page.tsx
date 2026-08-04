@@ -1,14 +1,5 @@
-import { MessageSquareQuote } from 'lucide-react';
-
-import { DashboardSectionPage } from '@/components/dashboard/DashboardSectionPage';
+import { TestimonialList } from '@/components/dashboard/testimonial/TestimonialList';
 
 export default function TestimonialDashboardPage() {
-	return (
-		<DashboardSectionPage
-			title='Testimonial'
-			description='Review, publish, and manage customer testimonials.'
-			icon={MessageSquareQuote}
-			apiPath='/api/testimonial/'
-		/>
-	);
+	return <TestimonialList />;
 }

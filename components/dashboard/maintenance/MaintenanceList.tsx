@@ -4,9 +4,11 @@ import { useCallback, useEffect, useState } from 'react';
 import { ExternalLink, Pencil, Plus, RefreshCw, Trash2, Wrench } from 'lucide-react';
 
 import { MaintenanceFormModal } from '@/components/dashboard/maintenance/MaintenanceFormModal';
+import { DashboardToggle } from '@/components/dashboard/DashboardToggle';
 import {
 	deleteMaintenanceTutorial,
 	fetchMaintenanceTutorials,
+	toggleMaintenanceTutorialHomepage,
 } from '@/lib/maintenance-api';
 import { resolveMediaUrl } from '@/lib/media-url';
 import type { MaintenanceTutorial } from '@/types/maintenance';
@@ -42,6 +44,7 @@ export function MaintenanceList() {
 	const [formTutorial, setFormTutorial] = useState<
 		MaintenanceTutorial | null | undefined
 	>(undefined);
+	const [togglingId, setTogglingId] = useState<number | null>(null);
 
 	const loadTutorials = useCallback(async () => {
 		setLoading(true);
@@ -85,6 +88,31 @@ export function MaintenanceList() {
 					? deleteError.message
 					: 'Failed to delete tutorial.',
 			);
+		}
+	};
+
+	const handleToggleHomepage = async (
+		tutorial: MaintenanceTutorial,
+		showOnHomepage: boolean,
+	) => {
+		setTogglingId(tutorial.id);
+
+		try {
+			const updated = await toggleMaintenanceTutorialHomepage(
+				tutorial.id,
+				showOnHomepage,
+			);
+			setTutorials((current) =>
+				current.map((item) => (item.id === tutorial.id ? updated : item)),
+			);
+		} catch (toggleError) {
+			window.alert(
+				toggleError instanceof Error
+					? toggleError.message
+					: 'Failed to update homepage visibility.',
+			);
+		} finally {
+			setTogglingId(null);
 		}
 	};
 
@@ -150,8 +178,9 @@ export function MaintenanceList() {
 			) : null}
 
 			<div className='overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm'>
-				<div className='hidden grid-cols-[minmax(0,1.4fr)_10rem_minmax(0,1fr)_7rem] gap-4 border-b border-slate-200 bg-slate-50 px-5 py-3 text-xs font-semibold tracking-wide text-slate-500 uppercase md:grid'>
+				<div className='hidden grid-cols-[minmax(0,1.2fr)_7rem_10rem_minmax(0,1fr)_7rem] gap-4 border-b border-slate-200 bg-slate-50 px-5 py-3 text-xs font-semibold tracking-wide text-slate-500 uppercase md:grid'>
 					<span>Title</span>
+					<span>Homepage</span>
 					<span>Video</span>
 					<span>Description</span>
 					<span className='text-right'>Actions</span>
@@ -178,17 +207,23 @@ export function MaintenanceList() {
 							return (
 								<li
 									key={tutorial.id}
-									className='grid gap-4 px-5 py-4 md:grid-cols-[minmax(0,1.4fr)_10rem_minmax(0,1fr)_7rem] md:items-center'
+									className='grid gap-4 px-5 py-4 md:grid-cols-[minmax(0,1.2fr)_7rem_10rem_minmax(0,1fr)_7rem] md:items-center'
 								>
 									<div>
 										<p className='font-medium text-slate-900'>
 											{tutorial.title}
 										</p>
-										{tutorial.show_on_homepage ? (
-											<span className='mt-1 inline-flex rounded-full bg-[#c1272d]/10 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-[#c1272d]'>
-												Homepage
-											</span>
-										) : null}
+									</div>
+
+									<div className='flex items-center'>
+										<DashboardToggle
+											checked={tutorial.show_on_homepage}
+											disabled={togglingId === tutorial.id}
+											label={`Show ${tutorial.title} on homepage`}
+											onChange={(checked) =>
+												void handleToggleHomepage(tutorial, checked)
+											}
+										/>
 									</div>
 
 									<div>

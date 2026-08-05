@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 import PageHero from '@/components/PageHero';
+import { RichTextContent } from '@/components/RichTextContent';
 import { fetchClientRecentWork } from '@/lib/public-recent-work-api';
 import {
 	formatDoneDate,
@@ -104,9 +105,11 @@ export default function RecentWorkDetailContent({ id }: Props) {
 						{formatDoneDate(work.done_date)}
 					</time>
 				</p>
-				<p className='mt-4 text-base leading-relaxed text-[#475569]'>
-					{work.description || 'Completed project by Vertex Property Services.'}
-				</p>
+				<RichTextContent
+					content={work.description}
+					className='mt-4 text-base leading-relaxed text-[#475569]'
+					fallback='Completed project by Vertex Property Services.'
+				/>
 				<p className='mt-8 text-sm text-[#64748b]'>
 					Interested in a similar project? We&apos;d love to hear about your
 					space—reach out for a free estimate.

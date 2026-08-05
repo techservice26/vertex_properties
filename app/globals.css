@@ -8,3 +8,14 @@
 		@apply bg-white;
 	}
 }
+
+@layer components {
+	.ProseMirror {
+		@apply min-h-[140px];
+	}
+
+	.ProseMirror p.is-editor-empty:first-child::before {
+		@apply pointer-events-none float-left h-0 text-slate-400;
+		content: attr(data-placeholder);
+	}
+}

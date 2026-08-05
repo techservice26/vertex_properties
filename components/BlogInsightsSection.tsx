@@ -1,32 +1,48 @@
+'use client';
+
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { HiArrowRight, HiChevronLeft, HiChevronRight } from 'react-icons/hi2';
 
-const posts = [
-	{
-		image: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?q=80&w=900&auto=format&fit=crop',
-		date: 'March 28, 2025',
-		title: 'Smart Home Repair Solutions For Modern Living',
-		description:
-			'Professional home maintenance solutions designed to improve comfort, safety, and long-term value.',
-	},
-	{
-		image: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?ixlib=rb-4.0.3&auto=format&fit=crop&w=900&q=80',
-		date: 'February 2, 2026',
-		title: 'Advanced Plumbing Repairs Engineered to Last',
-		description:
-			'Professional plumbing services designed to ensure efficient flow, safety, and long-lasting system performance.',
-	},
-	{
-		image: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?ixlib=rb-4.0.3&auto=format&fit=crop&w=900&q=80',
-		date: 'September 15, 2025',
-		title: 'Kitchen Cabinet Installation Crafted with Precision',
-		description:
-			'Expert installation ensures perfectly aligned cabinets, smooth functionality, and a clean kitchen finish.',
-	},
-];
+import { fetchClientBlogs } from '@/lib/public-blog-api';
+import { getHomepageBlogPosts } from '@/lib/blog-utils';
+import type { BlogPost } from '@/types/blog';
 
 export default function BlogInsightsSection() {
+	const [posts, setPosts] = useState<BlogPost[]>([]);
+	const [loading, setLoading] = useState(true);
+
+	useEffect(() => {
+		let cancelled = false;
+
+		async function loadPosts() {
+			setLoading(true);
+
+			try {
+				const blogs = await fetchClientBlogs();
+
+				if (!cancelled) {
+					setPosts(getHomepageBlogPosts(blogs, 3));
+				}
+			} catch {
+				if (!cancelled) {
+					setPosts(getHomepageBlogPosts([], 3));
+				}
+			} finally {
+				if (!cancelled) {
+					setLoading(false);
+				}
+			}
+		}
+
+		void loadPosts();
+
+		return () => {
+			cancelled = true;
+		};
+	}, []);
+
 	return (
 		<section
 			className='relative overflow-hidden bg-white px-4 py-14 sm:px-6 sm:py-16 lg:py-20'
@@ -58,13 +74,19 @@ export default function BlogInsightsSection() {
 					</h2>
 				</header>
 
+				{loading ? (
+					<p className='mt-10 text-center text-sm text-[#64748b] sm:mt-12'>
+						Loading blog posts...
+					</p>
+				) : null}
+
 				<ul className='mt-10 grid grid-cols-1 gap-6 sm:mt-12 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-8'>
-					{posts.map((p) => (
-						<li key={p.title}>
+					{posts.map((post) => (
+						<li key={post.id}>
 							<article className='flex h-full flex-col overflow-hidden rounded-2xl bg-white shadow-[0_4px_24px_rgba(15,23,42,0.08)] ring-1 ring-[#f1f5f9] transition hover:shadow-[0_8px_32px_rgba(15,23,42,0.1)]'>
 								<div className='relative aspect-[4/3] w-full shrink-0 overflow-hidden rounded-t-2xl'>
 									<Image
-										src={p.image}
+										src={post.imageSrc}
 										alt=''
 										fill
 										className='object-cover'
@@ -73,16 +95,16 @@ export default function BlogInsightsSection() {
 								</div>
 								<div className='flex flex-1 flex-col p-4 sm:p-5'>
 									<p className='text-xs text-[#94a3b8]'>
-										By admin · {p.date}
+										By admin · {post.date}
 									</p>
 									<h3 className='mt-2 font-sans text-base font-bold leading-snug text-[#0f172a] sm:text-[1.05rem]'>
-										{p.title}
+										{post.title}
 									</h3>
 									<p className='mt-2 flex-1 font-sans text-sm leading-relaxed text-[#64748b]'>
-										{p.description}
+										{post.excerpt}
 									</p>
 									<Link
-										href='#'
+										href={`/blog/${post.slug}`}
 										className='mt-4 inline-flex items-center gap-1.5 font-sans text-xs font-bold uppercase tracking-[0.12em] text-[#c1272d] transition hover:text-[#a61f29]'
 									>
 										Read more
@@ -99,7 +121,7 @@ export default function BlogInsightsSection() {
 
 				<div className='mt-10 flex flex-col items-stretch gap-5 sm:mt-12 sm:flex-row sm:items-center sm:justify-center sm:gap-6'>
 					<Link
-						href='#'
+						href='/blog'
 						className='inline-flex w-full items-center justify-center rounded-full bg-[#0f172a] px-10 py-3.5 text-center font-sans text-sm font-bold uppercase tracking-[0.12em] text-white transition hover:bg-[#1e293b] sm:w-auto sm:min-w-[260px] sm:px-12'
 					>
 						More blog posts

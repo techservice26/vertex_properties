@@ -1,34 +1,31 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import { Upload, X } from 'lucide-react';
 
-import { createRecentWork, updateRecentWork } from '@/lib/recent-work-api';
-import { resolveMediaUrl } from '@/lib/media-url';
-import { isRichTextEmpty, stripRichText } from '@/lib/rich-text-utils';
-import { RichTextEditor } from '@/components/dashboard/RichTextEditor';
-import type { RecentWork } from '@/types/recent-work';
+import { createOurPartner, updateOurPartner } from '@/lib/our-partner-api';
+import { getFrontendPartnerLogoUrl, getOurPartnerLogoUrl, isUsingFrontendPartnerLogo } from '@/lib/our-partner-utils';
+import type { OurPartner } from '@/types/our-partner';
 
-type RecentWorksFormModalProps = {
-	work?: RecentWork | null;
+type OurPartnersFormModalProps = {
+	partner?: OurPartner | null;
 	onClose: () => void;
-	onSaved: (work: RecentWork) => void;
+	onSaved: (partner: OurPartner) => void;
 };
 
 const inputClassName =
 	'w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none transition focus:border-[#c1272d] focus:ring-2 focus:ring-[#c1272d]/10';
 
-export function RecentWorksFormModal({
-	work,
+export function OurPartnersFormModal({
+	partner,
 	onClose,
 	onSaved,
-}: RecentWorksFormModalProps) {
-	const isEditing = Boolean(work);
+}: OurPartnersFormModalProps) {
+	const isEditing = Boolean(partner);
 
-	const [projectTitle, setProjectTitle] = useState(work?.project_title ?? '');
-	const [doneDate, setDoneDate] = useState(work?.done_date ?? '');
-	const [description, setDescription] = useState(work?.description ?? '');
-	const [projectImage, setProjectImage] = useState<File | null>(null);
+	const [companyName, setCompanyName] = useState(partner?.company_name ?? '');
+	const [partnerLogo, setPartnerLogo] = useState<File | null>(null);
 	const [error, setError] = useState('');
 	const [saving, setSaving] = useState(false);
 
@@ -47,23 +44,13 @@ export function RecentWorksFormModal({
 		event.preventDefault();
 		setError('');
 
-		if (!projectTitle.trim()) {
-			setError('Project title is required.');
+		if (!companyName.trim()) {
+			setError('Company name is required.');
 			return;
 		}
 
-		if (!doneDate) {
-			setError('Completion date is required.');
-			return;
-		}
-
-		if (!isEditing && !projectImage) {
-			setError('Project image is required.');
-			return;
-		}
-
-		if (stripRichText(description).length > 2000) {
-			setError('Description must be 2000 characters or fewer.');
+		if (!isEditing && !partnerLogo && !getFrontendPartnerLogoUrl(companyName)) {
+			setError('Partner logo is required unless a frontend fallback exists for this company name.');
 			return;
 		}
 
@@ -71,15 +58,13 @@ export function RecentWorksFormModal({
 
 		try {
 			const payload = {
-				project_title: projectTitle.trim(),
-				done_date: doneDate,
-				description: isRichTextEmpty(description) ? '' : description,
-				project_image: projectImage,
+				company_name: companyName.trim(),
+				partner_logo: partnerLogo,
 			};
 
 			const saved = isEditing
-				? await updateRecentWork(work!.id, payload)
-				: await createRecentWork(payload);
+				? await updateOurPartner(partner!.id, payload)
+				: await createOurPartner(payload);
 
 			onSaved(saved);
 			onClose();
@@ -87,23 +72,24 @@ export function RecentWorksFormModal({
 			setError(
 				submitError instanceof Error
 					? submitError.message
-					: 'Failed to save recent work.',
+					: 'Failed to save partner.',
 			);
 		} finally {
 			setSaving(false);
 		}
 	};
 
-	const existingImageUrl = work?.project_image
-		? resolveMediaUrl(work.project_image)
-		: null;
+	const existingLogoUrl = partner ? getOurPartnerLogoUrl(partner) : '';
+	const usingFrontendFallback = partner
+		? isUsingFrontendPartnerLogo(partner)
+		: Boolean(getFrontendPartnerLogoUrl(companyName));
 
 	return (
 		<div className='fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4'>
-			<div className='max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white shadow-xl'>
+			<div className='max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white shadow-xl'>
 				<div className='flex items-center justify-between border-b border-slate-200 px-6 py-4'>
 					<h2 className='text-lg font-semibold text-slate-900'>
-						{isEditing ? 'Edit recent work' : 'Add recent work'}
+						{isEditing ? 'Edit partner' : 'Add partner'}
 					</h2>
 					<button
 						type='button'
@@ -118,74 +104,59 @@ export function RecentWorksFormModal({
 				<form onSubmit={handleSubmit} className='space-y-5 px-6 py-5'>
 					<div>
 						<label
-							htmlFor='project_title'
+							htmlFor='company_name'
 							className='mb-1 block text-sm font-medium text-slate-700'
 						>
-							Project title
+							Company name
 						</label>
 						<input
-							id='project_title'
+							id='company_name'
 							type='text'
 							className={inputClassName}
-							value={projectTitle}
-							onChange={(event) => setProjectTitle(event.target.value)}
-							placeholder='Kitchen and bathroom remodel in Staten Island'
+							value={companyName}
+							onChange={(event) => setCompanyName(event.target.value)}
+							placeholder='AppFolio'
 							required
 						/>
 					</div>
 
 					<div>
 						<label
-							htmlFor='done_date'
+							htmlFor='partner_logo'
 							className='mb-1 block text-sm font-medium text-slate-700'
 						>
-							Completion date
-						</label>
-						<input
-							id='done_date'
-							type='date'
-							className={inputClassName}
-							value={doneDate}
-							onChange={(event) => setDoneDate(event.target.value)}
-							required
-						/>
-					</div>
-
-					<RichTextEditor
-						id='description'
-						label='Description'
-						value={description}
-						onChange={setDescription}
-						placeholder='Brief summary of the completed project.'
-						maxLength={2000}
-					/>
-
-					<div>
-						<label
-							htmlFor='project_image'
-							className='mb-1 block text-sm font-medium text-slate-700'
-						>
-							Project image
+							Partner logo
 						</label>
 						<label className='flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-sm text-slate-600 transition hover:border-[#c1272d]/40 hover:bg-[#c1272d]/5'>
 							<Upload className='h-4 w-4' />
-							{projectImage
-								? projectImage.name
-								: 'Choose image (JPG, PNG, WebP)'}
+							{partnerLogo ? partnerLogo.name : 'Choose logo (PNG, JPG, WebP)'}
 							<input
-								id='project_image'
+								id='partner_logo'
 								type='file'
 								accept='image/*'
 								className='hidden'
 								onChange={(event) =>
-									setProjectImage(event.target.files?.[0] ?? null)
+									setPartnerLogo(event.target.files?.[0] ?? null)
 								}
 							/>
 						</label>
-						{existingImageUrl && !projectImage ? (
-							<p className='mt-2 text-xs text-slate-500'>
-								Current image uploaded. Choose a new file to replace it.
-							</p>
+						{existingLogoUrl && !partnerLogo ? (
+							<div className='mt-3 flex items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3'>
+								<div className='relative h-10 w-28'>
+									<Image
+										src={existingLogoUrl}
+										alt={partner?.company_name ?? companyName}
+										fill
+										className='object-contain object-left'
+										sizes='112px'
+									/>
+								</div>
+								<p className='text-xs text-slate-500'>
+									{usingFrontendFallback
+										? 'Using frontend fallback logo. Upload a file to store one in the backend.'
+										: 'Current logo. Choose a new file to replace it.'}
+								</p>
+							</div>
 						) : null}
 					</div>
 
@@ -208,7 +179,7 @@ export function RecentWorksFormModal({
 							disabled={saving}
 							className='rounded-lg bg-[#c1272d] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#a01f24] disabled:cursor-not-allowed disabled:opacity-60'
 						>
-							{saving ? 'Saving...' : isEditing ? 'Save changes' : 'Add project'}
+							{saving ? 'Saving...' : isEditing ? 'Save changes' : 'Add partner'}
 						</button>
 					</div>
 				</form>

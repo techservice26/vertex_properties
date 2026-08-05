@@ -1,34 +1,33 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import { Upload, X } from 'lucide-react';
 
-import { createRecentWork, updateRecentWork } from '@/lib/recent-work-api';
-import { resolveMediaUrl } from '@/lib/media-url';
+import { createBlog, updateBlog } from '@/lib/blog-api';
+import { getBlogImageUrl } from '@/lib/blog-utils';
 import { isRichTextEmpty, stripRichText } from '@/lib/rich-text-utils';
 import { RichTextEditor } from '@/components/dashboard/RichTextEditor';
-import type { RecentWork } from '@/types/recent-work';
+import type { Blog } from '@/types/blog';
 
-type RecentWorksFormModalProps = {
-	work?: RecentWork | null;
+type BlogFormModalProps = {
+	blog?: Blog | null;
 	onClose: () => void;
-	onSaved: (work: RecentWork) => void;
+	onSaved: (blog: Blog) => void;
 };
 
 const inputClassName =
 	'w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none transition focus:border-[#c1272d] focus:ring-2 focus:ring-[#c1272d]/10';
 
-export function RecentWorksFormModal({
-	work,
-	onClose,
-	onSaved,
-}: RecentWorksFormModalProps) {
-	const isEditing = Boolean(work);
+export function BlogFormModal({ blog, onClose, onSaved }: BlogFormModalProps) {
+	const isEditing = Boolean(blog);
 
-	const [projectTitle, setProjectTitle] = useState(work?.project_title ?? '');
-	const [doneDate, setDoneDate] = useState(work?.done_date ?? '');
-	const [description, setDescription] = useState(work?.description ?? '');
-	const [projectImage, setProjectImage] = useState<File | null>(null);
+	const [title, setTitle] = useState(blog?.title ?? '');
+	const [description, setDescription] = useState(blog?.description ?? '');
+	const [showOnHomepage, setShowOnHomepage] = useState(
+		blog?.show_on_homepage ?? false,
+	);
+	const [image, setImage] = useState<File | null>(null);
 	const [error, setError] = useState('');
 	const [saving, setSaving] = useState(false);
 
@@ -47,23 +46,18 @@ export function RecentWorksFormModal({
 		event.preventDefault();
 		setError('');
 
-		if (!projectTitle.trim()) {
-			setError('Project title is required.');
+		if (!title.trim()) {
+			setError('Title is required.');
 			return;
 		}
 
-		if (!doneDate) {
-			setError('Completion date is required.');
+		if (isRichTextEmpty(description)) {
+			setError('Description is required.');
 			return;
 		}
 
-		if (!isEditing && !projectImage) {
-			setError('Project image is required.');
-			return;
-		}
-
-		if (stripRichText(description).length > 2000) {
-			setError('Description must be 2000 characters or fewer.');
+		if (stripRichText(description).length > 4000) {
+			setError('Description must be 4000 characters or fewer.');
 			return;
 		}
 
@@ -71,15 +65,15 @@ export function RecentWorksFormModal({
 
 		try {
 			const payload = {
-				project_title: projectTitle.trim(),
-				done_date: doneDate,
-				description: isRichTextEmpty(description) ? '' : description,
-				project_image: projectImage,
+				title: title.trim(),
+				description: description,
+				show_on_homepage: showOnHomepage,
+				image,
 			};
 
 			const saved = isEditing
-				? await updateRecentWork(work!.id, payload)
-				: await createRecentWork(payload);
+				? await updateBlog(blog!.id, payload)
+				: await createBlog(payload);
 
 			onSaved(saved);
 			onClose();
@@ -87,23 +81,21 @@ export function RecentWorksFormModal({
 			setError(
 				submitError instanceof Error
 					? submitError.message
-					: 'Failed to save recent work.',
+					: 'Failed to save blog post.',
 			);
 		} finally {
 			setSaving(false);
 		}
 	};
 
-	const existingImageUrl = work?.project_image
-		? resolveMediaUrl(work.project_image)
-		: null;
+	const existingImageUrl = blog ? getBlogImageUrl(blog) : '';
 
 	return (
 		<div className='fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4'>
 			<div className='max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white shadow-xl'>
 				<div className='flex items-center justify-between border-b border-slate-200 px-6 py-4'>
 					<h2 className='text-lg font-semibold text-slate-900'>
-						{isEditing ? 'Edit recent work' : 'Add recent work'}
+						{isEditing ? 'Edit blog post' : 'Add blog post'}
 					</h2>
 					<button
 						type='button'
@@ -118,76 +110,76 @@ export function RecentWorksFormModal({
 				<form onSubmit={handleSubmit} className='space-y-5 px-6 py-5'>
 					<div>
 						<label
-							htmlFor='project_title'
+							htmlFor='blog_title'
 							className='mb-1 block text-sm font-medium text-slate-700'
 						>
-							Project title
+							Title
 						</label>
 						<input
-							id='project_title'
+							id='blog_title'
 							type='text'
 							className={inputClassName}
-							value={projectTitle}
-							onChange={(event) => setProjectTitle(event.target.value)}
-							placeholder='Kitchen and bathroom remodel in Staten Island'
-							required
-						/>
-					</div>
-
-					<div>
-						<label
-							htmlFor='done_date'
-							className='mb-1 block text-sm font-medium text-slate-700'
-						>
-							Completion date
-						</label>
-						<input
-							id='done_date'
-							type='date'
-							className={inputClassName}
-							value={doneDate}
-							onChange={(event) => setDoneDate(event.target.value)}
+							value={title}
+							onChange={(event) => setTitle(event.target.value)}
+							placeholder='Smart Home Repair Solutions For Modern Living'
 							required
 						/>
 					</div>
 
 					<RichTextEditor
-						id='description'
+						id='blog_description'
 						label='Description'
 						value={description}
 						onChange={setDescription}
-						placeholder='Brief summary of the completed project.'
-						maxLength={2000}
+						placeholder='Short summary shown on the homepage and blog listing.'
+						maxLength={4000}
+						required
 					/>
 
 					<div>
 						<label
-							htmlFor='project_image'
+							htmlFor='blog_image'
 							className='mb-1 block text-sm font-medium text-slate-700'
 						>
-							Project image
+							Cover image
 						</label>
 						<label className='flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-sm text-slate-600 transition hover:border-[#c1272d]/40 hover:bg-[#c1272d]/5'>
 							<Upload className='h-4 w-4' />
-							{projectImage
-								? projectImage.name
-								: 'Choose image (JPG, PNG, WebP)'}
+							{image ? image.name : 'Choose image (JPG, PNG, WebP)'}
 							<input
-								id='project_image'
+								id='blog_image'
 								type='file'
 								accept='image/*'
 								className='hidden'
-								onChange={(event) =>
-									setProjectImage(event.target.files?.[0] ?? null)
-								}
+								onChange={(event) => setImage(event.target.files?.[0] ?? null)}
 							/>
 						</label>
-						{existingImageUrl && !projectImage ? (
-							<p className='mt-2 text-xs text-slate-500'>
-								Current image uploaded. Choose a new file to replace it.
-							</p>
+						{existingImageUrl && !image ? (
+							<div className='mt-3 overflow-hidden rounded-lg border border-slate-200 bg-slate-50 p-3'>
+								<div className='relative aspect-[4/3] w-full max-w-xs'>
+									<Image
+										src={existingImageUrl}
+										alt={blog?.title ?? title}
+										fill
+										className='object-cover'
+										sizes='320px'
+									/>
+								</div>
+							</div>
 						) : null}
 					</div>
+
+					<label className='flex items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3'>
+						<input
+							type='checkbox'
+							checked={showOnHomepage}
+							onChange={(event) => setShowOnHomepage(event.target.checked)}
+							className='h-4 w-4 rounded border-slate-300 text-[#c1272d] focus:ring-[#c1272d]'
+						/>
+						<span className='text-sm text-slate-700'>
+							Show in Vertex Insights &amp; Articles on homepage
+						</span>
+					</label>
 
 					{error ? (
 						<div className='rounded-lg border border-[#c1272d]/20 bg-[#c1272d]/5 px-3 py-2 text-sm text-[#c1272d]'>
@@ -208,7 +200,7 @@ export function RecentWorksFormModal({
 							disabled={saving}
 							className='rounded-lg bg-[#c1272d] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#a01f24] disabled:cursor-not-allowed disabled:opacity-60'
 						>
-							{saving ? 'Saving...' : isEditing ? 'Save changes' : 'Add project'}
+							{saving ? 'Saving...' : isEditing ? 'Save changes' : 'Add post'}
 						</button>
 					</div>
 				</form>

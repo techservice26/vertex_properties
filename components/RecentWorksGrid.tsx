@@ -11,6 +11,7 @@ import {
 	getRecentWorkImageUrl,
 	sortRecentWorks,
 } from '@/lib/recent-work-utils';
+import { getRichTextPlainText } from '@/lib/rich-text-utils';
 import type { RecentWork } from '@/types/recent-work';
 
 type Props = {
@@ -133,9 +134,11 @@ export default function RecentWorksGrid({
 										<h3 className='mt-2 font-sans text-base font-bold leading-snug text-[#1e3a5f] sm:text-[1.05rem]'>
 											{work.project_title}
 										</h3>
-										<p className='mt-2 flex-1 font-sans text-sm leading-relaxed text-[#64748b]'>
-											{work.description || 'Completed project by Vertex Property Services.'}
-										</p>
+									<p className='mt-2 flex-1 font-sans text-sm leading-relaxed text-[#64748b]'>
+										{work.description
+											? getRichTextPlainText(work.description, 180)
+											: 'Completed project by Vertex Property Services.'}
+									</p>
 										<Link
 											href={`/projects/${work.id}`}
 											className='mt-4 inline-flex items-center gap-1.5 font-sans text-[11px] font-bold uppercase tracking-[0.12em] text-[#c1272d] transition hover:text-[#a61f29] sm:text-xs'

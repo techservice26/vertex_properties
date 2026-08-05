@@ -4,23 +4,71 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { HiArrowRight, HiChevronLeft, HiChevronRight } from 'react-icons/hi2';
-import { NEWS_ARTICLES } from '@/data/newsArticles';
+
+import { fetchClientBlogs } from '@/lib/public-blog-api';
+import { resolveBlogPosts } from '@/lib/blog-utils';
+import type { BlogPost } from '@/types/blog';
 
 const PER_PAGE = 9;
 
 export default function NewsArticlesGrid() {
+	const [posts, setPosts] = useState<BlogPost[]>([]);
+	const [loading, setLoading] = useState(true);
 	const [page, setPage] = useState(1);
-	const totalPages = Math.max(1, Math.ceil(NEWS_ARTICLES.length / PER_PAGE));
 
 	useEffect(() => {
-		if (page > totalPages) setPage(totalPages);
+		let cancelled = false;
+
+		async function loadPosts() {
+			setLoading(true);
+
+			try {
+				const blogs = await fetchClientBlogs();
+
+				if (!cancelled) {
+					setPosts(resolveBlogPosts(blogs));
+				}
+			} catch {
+				if (!cancelled) {
+					setPosts(resolveBlogPosts([]));
+				}
+			} finally {
+				if (!cancelled) {
+					setLoading(false);
+				}
+			}
+		}
+
+		void loadPosts();
+
+		return () => {
+			cancelled = true;
+		};
+	}, []);
+
+	const totalPages = Math.max(1, Math.ceil(posts.length / PER_PAGE));
+
+	useEffect(() => {
+		if (page > totalPages) {
+			setPage(totalPages);
+		}
 	}, [page, totalPages]);
 
 	const effectivePage = Math.min(page, totalPages);
 	const slice = useMemo(() => {
 		const start = (effectivePage - 1) * PER_PAGE;
-		return NEWS_ARTICLES.slice(start, start + PER_PAGE);
-	}, [effectivePage]);
+		return posts.slice(start, start + PER_PAGE);
+	}, [effectivePage, posts]);
+
+	if (loading) {
+		return (
+			<div className='bg-white px-4 pb-16 pt-8 sm:px-6 sm:pb-20 lg:px-8'>
+				<div className='mx-auto max-w-6xl py-12 text-center text-sm text-[#64748b]'>
+					Loading articles...
+				</div>
+			</div>
+		);
+	}
 
 	return (
 		<div className='bg-white px-4 pb-16 pt-8 sm:px-6 sm:pb-20 lg:px-8'>
@@ -75,31 +123,35 @@ export default function NewsArticlesGrid() {
 				>
 					<button
 						type='button'
-						onClick={() => setPage((p) => Math.max(1, p - 1))}
+						onClick={() => setPage((current) => Math.max(1, current - 1))}
 						disabled={effectivePage <= 1}
 						className='flex h-11 w-11 items-center justify-center rounded-full border-2 border-[#c1272d] text-[#c1272d] transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-35'
 						aria-label='Previous page'
 					>
 						<HiChevronLeft className='h-5 w-5' aria-hidden />
 					</button>
-					{Array.from({ length: totalPages }, (_, i) => i + 1).map((n) => (
-						<button
-							key={n}
-							type='button'
-							onClick={() => setPage(n)}
-							className={`flex h-11 min-w-[2.75rem] items-center justify-center rounded-full border-2 bg-transparent px-3 font-sans text-sm font-semibold text-[#1e293b] transition hover:bg-[#f8fafc] ${
-								effectivePage === n
-									? 'border-[#1e293b] ring-2 ring-[#1e293b]/15'
-									: 'border-[#1e293b]'
-							}`}
-							aria-current={effectivePage === n ? 'page' : undefined}
-						>
-							{String(n).padStart(2, '0')}
-						</button>
-					))}
+					{Array.from({ length: totalPages }, (_, index) => index + 1).map(
+						(pageNumber) => (
+							<button
+								key={pageNumber}
+								type='button'
+								onClick={() => setPage(pageNumber)}
+								className={`flex h-11 min-w-[2.75rem] items-center justify-center rounded-full border-2 bg-transparent px-3 font-sans text-sm font-semibold text-[#1e293b] transition hover:bg-[#f8fafc] ${
+									effectivePage === pageNumber
+										? 'border-[#1e293b] ring-2 ring-[#1e293b]/15'
+										: 'border-[#1e293b]'
+								}`}
+								aria-current={effectivePage === pageNumber ? 'page' : undefined}
+							>
+								{String(pageNumber).padStart(2, '0')}
+							</button>
+						),
+					)}
 					<button
 						type='button'
-						onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+						onClick={() =>
+							setPage((current) => Math.min(totalPages, current + 1))
+						}
 						disabled={effectivePage >= totalPages}
 						className='flex h-11 w-11 items-center justify-center rounded-full border-2 border-[#1e293b] text-[#1e293b] transition hover:bg-[#f8fafc] disabled:cursor-not-allowed disabled:opacity-35'
 						aria-label='Next page'

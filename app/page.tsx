@@ -18,9 +18,9 @@ import WhyChooseUsSection from '@/components/WhyChooseUsSection';
 import { fetchPublicMaintenanceTutorials } from '@/lib/public-maintenance-api';
 
 export default async function Home() {
-	const maintenanceTutorials = await fetchPublicMaintenanceTutorials({
-		showOnHomepage: true,
-	}).catch(() => []);
+	const maintenanceTutorials = await fetchPublicMaintenanceTutorials().catch(
+		() => [],
+	);
 
 	return (
 		<div className='min-h-screen bg-white'>

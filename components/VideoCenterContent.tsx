@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import { MaintenanceTutorialCard } from '@/components/MaintenanceTutorialCard';
-import { mapMaintenanceTutorialsToDisplay } from '@/lib/maintenance-video-utils';
+import { resolveMaintenanceTutorialDisplays } from '@/lib/maintenance-video-utils';
 import type { MaintenanceTutorial } from '@/types/maintenance';
 
 const PER_PAGE = 6;
@@ -18,7 +18,7 @@ export default function VideoCenterContent({
 	const [page, setPage] = useState(1);
 
 	const displayTutorials = useMemo(
-		() => mapMaintenanceTutorialsToDisplay(maintenanceTutorials),
+		() => resolveMaintenanceTutorialDisplays(maintenanceTutorials),
 		[maintenanceTutorials],
 	);
 
@@ -51,19 +51,13 @@ export default function VideoCenterContent({
 					Services.
 				</p>
 
-				{displayTutorials.length === 0 ? (
-					<p className='mt-12 text-center text-[#64748b]'>
-						No maintenance tutorials have been published yet.
-					</p>
-				) : (
-					<ul className='mt-12 grid list-none grid-cols-1 gap-8 sm:mt-14 sm:grid-cols-2 sm:gap-x-8 sm:gap-y-10'>
-						{pageSlice.map((tutorial) => (
-							<li key={tutorial.id}>
-								<MaintenanceTutorialCard tutorial={tutorial} variant='grid' />
-							</li>
-						))}
-					</ul>
-				)}
+				<ul className='mt-12 grid list-none grid-cols-1 gap-8 sm:mt-14 sm:grid-cols-2 sm:gap-x-8 sm:gap-y-10'>
+					{pageSlice.map((tutorial) => (
+						<li key={tutorial.id}>
+							<MaintenanceTutorialCard tutorial={tutorial} variant='grid' />
+						</li>
+					))}
+				</ul>
 
 				{displayTutorials.length > PER_PAGE ? (
 					<nav

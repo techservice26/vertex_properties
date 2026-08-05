@@ -15,7 +15,7 @@ import { TbHammer } from 'react-icons/tb';
 
 import { MaintenanceTutorialCard } from '@/components/MaintenanceTutorialCard';
 import {
-	mapMaintenanceTutorialsToDisplay,
+	resolveMaintenanceTutorialDisplays,
 } from '@/lib/maintenance-video-utils';
 import type { MaintenanceTutorial } from '@/types/maintenance';
 
@@ -29,7 +29,7 @@ export default function GeneralMaintenanceTutorialSection({
 	tutorials,
 }: GeneralMaintenanceTutorialSectionProps) {
 	const displayTutorials = useMemo(
-		() => mapMaintenanceTutorialsToDisplay(tutorials),
+		() => resolveMaintenanceTutorialDisplays(tutorials, { homepageOnly: true }),
 		[tutorials],
 	);
 	const [page, setPage] = useState(0);
@@ -78,20 +78,13 @@ export default function GeneralMaintenanceTutorialSection({
 					</h2>
 				</header>
 
-				{displayTutorials.length === 0 ? (
-					<p className='mt-10 text-center text-sm text-[#64748b]'>
-						Maintenance tutorials will appear here once they are published from
-						the dashboard.
-					</p>
-				) : (
-					<ul className='mt-10 grid grid-cols-1 gap-8 sm:grid-cols-2 sm:gap-7 lg:mt-12 lg:gap-8'>
-						{visibleTutorials.map((tutorial) => (
-							<li key={tutorial.id}>
-								<MaintenanceTutorialCard tutorial={tutorial} variant='home' />
-							</li>
-						))}
-					</ul>
-				)}
+				<ul className='mt-10 grid grid-cols-1 gap-8 sm:grid-cols-2 sm:gap-7 lg:mt-12 lg:gap-8'>
+					{visibleTutorials.map((tutorial) => (
+						<li key={tutorial.id}>
+							<MaintenanceTutorialCard tutorial={tutorial} variant='home' />
+						</li>
+					))}
+				</ul>
 
 				<div className='mt-10 flex flex-col items-stretch gap-5 sm:mt-12 sm:flex-row sm:items-center sm:justify-between lg:mt-14'>
 					<Link

@@ -1,4 +1,5 @@
 import { resolveMediaUrl } from '@/lib/media-url';
+import { VIDEO_ENTRIES, type VideoEntry } from '@/data/videoCenter';
 import type { MaintenanceTutorial } from '@/types/maintenance';
 
 export const DEFAULT_MAINTENANCE_THUMB =
@@ -127,4 +128,74 @@ export function mapMaintenanceTutorialsToDisplay(
 	return tutorials
 		.map(mapMaintenanceTutorialToDisplay)
 		.filter((tutorial): tutorial is MaintenanceTutorialDisplay => tutorial !== null);
+}
+
+function mapStaticVideoEntryToDisplay(
+	entry: VideoEntry,
+	index: number,
+): MaintenanceTutorialDisplay {
+	const href = entry.href.trim();
+	const youtubeId = getYoutubeVideoId(href);
+
+	if (youtubeId) {
+		return {
+			id: -(index + 1),
+			title: entry.title,
+			href,
+			thumbnailSrc: entry.thumbnailSrc,
+			description: null,
+			playerType: 'youtube',
+			playSrc: `https://www.youtube.com/embed/${youtubeId}?autoplay=1&rel=0`,
+		};
+	}
+
+	if (isDirectVideoUrl(href)) {
+		return {
+			id: -(index + 1),
+			title: entry.title,
+			href,
+			thumbnailSrc: entry.thumbnailSrc,
+			description: null,
+			playerType: 'html5',
+			playSrc: href,
+		};
+	}
+
+	return {
+		id: -(index + 1),
+		title: entry.title,
+		href,
+		thumbnailSrc: entry.thumbnailSrc,
+		description: null,
+		playerType: 'external',
+		playSrc: href,
+	};
+}
+
+export function getStaticMaintenanceTutorialDisplays() {
+	return VIDEO_ENTRIES.map(mapStaticVideoEntryToDisplay);
+}
+
+type ResolveMaintenanceTutorialOptions = {
+	homepageOnly?: boolean;
+};
+
+export function resolveMaintenanceTutorialDisplays(
+	apiTutorials: MaintenanceTutorial[],
+	options: ResolveMaintenanceTutorialOptions = {},
+) {
+	if (apiTutorials.length === 0) {
+		return getStaticMaintenanceTutorialDisplays();
+	}
+
+	let source = apiTutorials;
+
+	if (options.homepageOnly) {
+		const homepageTutorials = apiTutorials.filter(
+			(tutorial) => tutorial.show_on_homepage,
+		);
+		source = homepageTutorials.length > 0 ? homepageTutorials : apiTutorials;
+	}
+
+	return mapMaintenanceTutorialsToDisplay(source);
 }

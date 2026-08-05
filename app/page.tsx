@@ -15,8 +15,13 @@ import PropertyMaintenanceServicesSection from '@/components/PropertyMaintenance
 import TrustedPartnersNetworkSection from '@/components/TrustedPartnersNetworkSection';
 import TrustedPropertyExpertsSection from '@/components/TrustedPropertyExpertsSection';
 import WhyChooseUsSection from '@/components/WhyChooseUsSection';
+import { fetchPublicMaintenanceTutorials } from '@/lib/public-maintenance-api';
 
-export default function Home() {
+export default async function Home() {
+	const maintenanceTutorials = await fetchPublicMaintenanceTutorials().catch(
+		() => [],
+	);
+
 	return (
 		<div className='min-h-screen bg-white'>
 			<HeroSection />
@@ -24,7 +29,7 @@ export default function Home() {
 			<AboutUsSection />
 			<PropertyMaintenanceServicesSection />
 			<BrandMarquee />
-			<GeneralMaintenanceTutorialSection />
+			<GeneralMaintenanceTutorialSection tutorials={maintenanceTutorials} />
 			<CustomerReviewsSection />
 			<FaqAndStatsSection />
 			<ProfessionalCtaSection />

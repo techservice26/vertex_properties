@@ -1,31 +1,15 @@
+'use client';
+
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
+
+import { fetchClientPartnersNetwork } from '@/lib/public-partners-network-api';
+import { getPartnersNetworkLogoUrl } from '@/lib/partners-network-utils';
+import type { PartnersNetworkPartner } from '@/types/partners-network';
 
 /** Hollow headline stroke (same pattern as Areas We Serve). */
 const OUTLINE_NAVY =
 	'-1px -1px 0 #0f172a, 1px -1px 0 #0f172a, -1px 1px 0 #0f172a, 1px 1px 0 #0f172a';
-
-const partners = [
-	{
-		name: 'The Home Depot Pro',
-		src: '/images/trusted_network_partners/home_depot.png',
-	},
-	{
-		name: 'NARPM',
-		src: '/images/trusted_network_partners/narpm.png',
-	},
-	{
-		name: "Lowe's PRO",
-		src: '/images/trusted_network_partners/lowes.png',
-	},
-	{
-		name: 'The Home Depot Pro',
-		src: '/images/trusted_network_partners/home_depot.png',
-	},
-	{
-		name: 'BOMA International',
-		src: '/images/trusted_network_partners/boma.png',
-	},
-] as const;
 
 const MARQUEE_REPEAT = 8;
 
@@ -51,6 +35,45 @@ function MarqueeStrip({ suffix }: { suffix: string }) {
 }
 
 export default function TrustedPartnersNetworkSection() {
+	const [partners, setPartners] = useState<PartnersNetworkPartner[]>([]);
+	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState('');
+
+	useEffect(() => {
+		let cancelled = false;
+
+		async function loadPartners() {
+			setLoading(true);
+			setError('');
+
+			try {
+				const data = await fetchClientPartnersNetwork();
+
+				if (!cancelled) {
+					setPartners(data);
+				}
+			} catch (loadError) {
+				if (!cancelled) {
+					setError(
+						loadError instanceof Error
+							? loadError.message
+							: 'Failed to load partners network.',
+					);
+				}
+			} finally {
+				if (!cancelled) {
+					setLoading(false);
+				}
+			}
+		}
+
+		void loadPartners();
+
+		return () => {
+			cancelled = true;
+		};
+	}, []);
+
 	return (
 		<section
 			className='bg-white px-4 pb-6 pt-4 sm:px-6 sm:pb-8 sm:pt-6'
@@ -68,20 +91,50 @@ export default function TrustedPartnersNetworkSection() {
 					<div className='h-px flex-1 bg-[#e2e8f0]' aria-hidden />
 				</div>
 
-				<ul className='mt-8 flex flex-wrap items-center justify-center gap-x-8 gap-y-6 sm:mt-10 sm:gap-x-10 md:justify-between md:gap-x-6'>
-					{partners.map((p, i) => (
-						<li key={`${p.name}-${i}`}>
-							<Image
-								src={p.src}
-								alt={p.name}
-								width={180}
-								height={64}
-								className='h-9 w-auto max-w-[120px] object-contain object-center sm:h-11 sm:max-w-[140px] md:h-12 md:max-w-[160px]'
-								sizes='(max-width: 768px) 120px, 160px'
-							/>
-						</li>
-					))}
-				</ul>
+				{loading ? (
+					<p className='mt-8 text-center text-sm text-[#64748b] sm:mt-10'>
+						Loading partners network...
+					</p>
+				) : null}
+
+				{error ? (
+					<p className='mt-8 text-center text-sm text-[#c1272d] sm:mt-10'>
+						{error}
+					</p>
+				) : null}
+
+				{!loading && !error && partners.length === 0 ? (
+					<p className='mt-8 text-center text-sm text-[#64748b] sm:mt-10'>
+						No network partners to show yet.
+					</p>
+				) : null}
+
+				{partners.length > 0 ? (
+					<ul className='mt-8 flex flex-wrap items-center justify-center gap-x-8 gap-y-6 sm:mt-10 sm:gap-x-10 md:justify-between md:gap-x-6'>
+						{partners.map((partner) => {
+							const logoUrl = getPartnersNetworkLogoUrl(partner);
+
+							return (
+								<li key={partner.id}>
+									{logoUrl ? (
+										<Image
+											src={logoUrl}
+											alt={partner.company_name}
+											width={180}
+											height={64}
+											className='h-9 w-auto max-w-[120px] object-contain object-center sm:h-11 sm:max-w-[140px] md:h-12 md:max-w-[160px]'
+											sizes='(max-width: 768px) 120px, 160px'
+										/>
+									) : (
+										<span className='font-sans text-sm font-semibold text-[#0f172a] sm:text-base'>
+											{partner.company_name}
+										</span>
+									)}
+								</li>
+							);
+						})}
+					</ul>
+				) : null}
 			</div>
 
 			<div

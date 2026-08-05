@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import PageHero from '@/components/PageHero';
 import VideoCenterContent from '@/components/VideoCenterContent';
 import PreFooterCtaSection from '@/components/PreFooterCtaSection';
+import { fetchPublicMaintenanceTutorials } from '@/lib/public-maintenance-api';
 
 export const metadata: Metadata = {
 	title: 'Video Center | Vertex Property Services',
@@ -9,7 +10,11 @@ export const metadata: Metadata = {
 		'Browse Vertex Property Services video tutorials: home repair, plumbing, electrical, painting, maintenance, and safety tips.',
 };
 
-export default function VideoCenterPage() {
+export default async function VideoCenterPage() {
+	const maintenanceTutorials = await fetchPublicMaintenanceTutorials().catch(
+		() => [],
+	);
+
 	return (
 		<div className='min-h-screen bg-white'>
 			<PageHero
@@ -19,7 +24,7 @@ export default function VideoCenterPage() {
 					{ label: 'Video Center' },
 				]}
 			/>
-			<VideoCenterContent />
+			<VideoCenterContent maintenanceTutorials={maintenanceTutorials} />
 			<PreFooterCtaSection />
 		</div>
 	);

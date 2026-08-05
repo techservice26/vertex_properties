@@ -1,12 +1,15 @@
 'use client';
 
-import { useId, useState } from 'react';
+import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import {
 	HiChatBubbleLeftRight,
 	HiCheck,
 	HiEnvelope,
 	HiPhone,
 } from 'react-icons/hi2';
+
+import { Toast } from '@/components/Toast';
+import { submitContactMessage } from '@/lib/public-contact-api';
 
 const NAVY = '#2b345b';
 const RED = '#e60012';
@@ -88,51 +91,162 @@ function MessageTextarea({ id, name }: { id: string; name: string }) {
 
 export default function ContactMessageForm() {
 	const formId = useId();
+	const containerRef = useRef<HTMLDivElement>(null);
 	const [preferred, setPreferred] = useState<Preferred>('phone');
 	const [fileLabel, setFileLabel] = useState<string>('');
 	const [submitted, setSubmitted] = useState(false);
+	const [submitting, setSubmitting] = useState(false);
+	const [error, setError] = useState('');
+	const [toast, setToast] = useState<{
+		message: string;
+		variant: 'success' | 'error';
+	} | null>(null);
 	const fileInputId = `${formId}-file`;
 
-	function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-		e.preventDefault();
-		setSubmitted(true);
+	const dismissToast = useCallback(() => {
+		setToast(null);
+	}, []);
+
+	useEffect(() => {
+		if (!submitted || !containerRef.current) {
+			return;
+		}
+
+		const frame = window.requestAnimationFrame(() => {
+			containerRef.current?.scrollIntoView({
+				behavior: 'smooth',
+				block: 'start',
+			});
+		});
+
+		return () => window.cancelAnimationFrame(frame);
+	}, [submitted]);
+
+	async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+		event.preventDefault();
+		setError('');
+
+		const form = event.currentTarget;
+		const formData = new FormData(form);
+		const firstName = String(formData.get('firstName') ?? '').trim();
+		const lastName = String(formData.get('lastName') ?? '').trim();
+		const email = String(formData.get('email') ?? '').trim();
+		const phone = String(formData.get('phone') ?? '').trim();
+		const address = String(formData.get('address') ?? '').trim();
+		const city = String(formData.get('city') ?? '').trim();
+		const message = String(formData.get('message') ?? '').trim();
+		const attachment = formData.get('attachment');
+		const preferredLabel =
+			preferredOptions.find((option) => option.id === preferred)?.label ??
+			preferred;
+
+		if (
+			!firstName ||
+			!lastName ||
+			!email ||
+			!phone ||
+			!address ||
+			!city ||
+			!message
+		) {
+			setError('Please fill in all required fields.');
+			return;
+		}
+
+		setSubmitting(true);
+
+		try {
+			await submitContactMessage({
+				first_name: firstName,
+				last_name: lastName,
+				email,
+				phone,
+				address,
+				city,
+				description: `Preferred contact method: ${preferredLabel}\n\n${message}`,
+				attachment:
+					attachment instanceof File && attachment.size > 0 ? attachment : null,
+			});
+
+			setSubmitted(true);
+			form.reset();
+			setFileLabel('');
+			setToast({
+				message: 'Thank you! Your message was sent successfully.',
+				variant: 'success',
+			});
+		} catch (submitError) {
+			const message =
+				submitError instanceof Error
+					? submitError.message
+					: 'Failed to submit your message. Please try again.';
+
+			setError(message);
+			setToast({
+				message,
+				variant: 'error',
+			});
+		} finally {
+			setSubmitting(false);
+		}
 	}
 
 	if (submitted) {
 		return (
-			<div className='mx-auto max-w-5xl overflow-hidden rounded-[20px] shadow-[0_8px_40px_rgba(43,52,91,0.12)] ring-1 ring-black/[0.06]'>
+			<>
+				<Toast
+					message={toast?.message ?? 'Thank you! Your message was sent successfully.'}
+					visible={Boolean(toast)}
+					variant={toast?.variant ?? 'success'}
+					onClose={dismissToast}
+				/>
 				<div
-					className='px-6 py-14 text-center sm:px-10 sm:py-16'
-					style={{ backgroundColor: NAVY }}
+					ref={containerRef}
+					className='mx-auto max-w-5xl scroll-mt-28 overflow-hidden rounded-[20px] shadow-[0_8px_40px_rgba(43,52,91,0.12)] ring-1 ring-black/[0.06]'
 				>
-					<p
-						className='text-xs font-bold uppercase tracking-[0.2em]'
-						style={{ color: RED }}
+					<div
+						className='px-6 py-14 text-center sm:px-10 sm:py-16'
+						style={{ backgroundColor: NAVY }}
 					>
-						Contact us
-					</p>
-					<h2 className='mt-3 font-sans text-2xl font-bold text-white sm:text-3xl'>
-						Thank you for reaching out
-					</h2>
-					<p className='mx-auto mt-4 max-w-lg text-sm leading-relaxed text-white/80'>
-						We received your message and will respond as soon as possible. For
-						urgent needs, call{' '}
-						<a
-							href={`tel:${PHONE_RAW}`}
-							className='font-semibold underline-offset-2 hover:underline'
-							style={{ color: '#ffb800' }}
+						<p
+							className='text-xs font-bold uppercase tracking-[0.2em]'
+							style={{ color: RED }}
 						>
-							{PHONE_DISPLAY}
-						</a>
-						.
-					</p>
+							Contact us
+						</p>
+						<h2 className='mt-3 font-sans text-2xl font-bold text-white sm:text-3xl'>
+							Thank you for reaching out
+						</h2>
+						<p className='mx-auto mt-4 max-w-lg text-sm leading-relaxed text-white/80'>
+							We received your message and will respond as soon as possible. For
+							urgent needs, call{' '}
+							<a
+								href={`tel:${PHONE_RAW}`}
+								className='font-semibold underline-offset-2 hover:underline'
+								style={{ color: '#ffb800' }}
+							>
+								{PHONE_DISPLAY}
+							</a>
+							.
+						</p>
+					</div>
 				</div>
-			</div>
+			</>
 		);
 	}
 
 	return (
-		<div className='mx-auto max-w-5xl overflow-hidden rounded-[20px] shadow-[0_8px_40px_rgba(43,52,91,0.12)] ring-1 ring-black/[0.06]'>
+		<>
+			<Toast
+				message={toast?.message ?? ''}
+				visible={Boolean(toast)}
+				variant={toast?.variant ?? 'error'}
+				onClose={dismissToast}
+			/>
+			<div
+				ref={containerRef}
+				className='mx-auto max-w-5xl scroll-mt-28 overflow-hidden rounded-[20px] shadow-[0_8px_40px_rgba(43,52,91,0.12)] ring-1 ring-black/[0.06]'
+			>
 			{/* Header — navy, top rounded via parent overflow-hidden */}
 			<header
 				className='px-6 pb-2 pt-10 text-center sm:px-10 sm:pt-12'
@@ -258,15 +372,13 @@ export default function ContactMessageForm() {
 							className='mb-3 block text-sm font-bold text-[#0f172a]'
 						>
 							Upload Photo &amp; File
-							<span style={{ color: ASTERISK }}>*</span>
 						</span>
 						<input
 							id={fileInputId}
 							name='attachment'
 							type='file'
-							required
 							className='sr-only'
-							accept='image/*,.pdf,.doc,.docx'
+							accept='image/*,.pdf'
 							aria-labelledby={`${fileInputId}-label`}
 							onChange={(ev) => {
 								const f = ev.target.files?.[0];
@@ -288,12 +400,21 @@ export default function ContactMessageForm() {
 						</p>
 					</div>
 
+					{error ? (
+						<p className='mt-6 rounded-xl bg-white px-4 py-3 text-sm font-medium text-[#c1272d] shadow-sm ring-1 ring-[#c1272d]/20'>
+							{error}
+						</p>
+					) : null}
+
 					<button
 						type='submit'
-						className='relative mt-10 flex w-full items-center rounded-full py-4 pl-6 pr-4 text-sm font-bold uppercase tracking-[0.12em] text-white shadow-md transition hover:brightness-95 sm:py-[1.125rem] sm:text-[15px]'
+						disabled={submitting}
+						className='relative mt-10 flex w-full items-center rounded-full py-4 pl-6 pr-4 text-sm font-bold uppercase tracking-[0.12em] text-white shadow-md transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-70 sm:py-[1.125rem] sm:text-[15px]'
 						style={{ backgroundColor: RED }}
 					>
-						<span className='flex-1 text-center pr-2'>Submit now</span>
+						<span className='flex-1 pr-2 text-center'>
+							{submitting ? 'Submitting...' : 'Submit now'}
+						</span>
 						<span
 							className='flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white shadow-inner'
 							aria-hidden
@@ -308,5 +429,6 @@ export default function ContactMessageForm() {
 				</form>
 			</div>
 		</div>
+		</>
 	);
 }

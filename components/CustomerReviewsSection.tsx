@@ -1,35 +1,94 @@
 'use client';
 
 import Image from 'next/image';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { FaStar } from 'react-icons/fa6';
 import { HiChevronLeft, HiChevronRight } from 'react-icons/hi2';
 
-const reviews = [
-	{
-		name: 'Daisey H.',
-		text: "I've used Vertex Property Services two times. They were friendly, clean, quick and efficient. They were able to successfully fix everything we needed help with. Their office staff was also professional and attentive.",
-	},
-	{
-		name: 'Marcus T.',
-		text: 'Our management company relies on Vertex for turnovers and emergency repairs. Response times are excellent, pricing is transparent, and the crews consistently leave units presentable for the next resident.',
-	},
-	{
-		name: 'Jennifer L.',
-		text: 'From a leaking water heater to exterior paint prep, they handled it all without me chasing them. Communication was clear, work was on schedule, and I would not hesitate to call them again.',
-	},
-];
+import { fetchClientTestimonials } from '@/lib/public-testimonial-api';
+import { resolveMediaUrl } from '@/lib/media-url';
+import type { Testimonial } from '@/types/testimonial';
 
-export default function CustomerReviewsSection() {
+type CustomerReviewsSectionProps = {
+	testimonials?: Testimonial[];
+};
+
+function renderStars(rating: number) {
+	const filled = Math.round(rating);
+
+	return Array.from({ length: 5 }).map((_, index) => (
+		<FaStar
+			key={index}
+			className={`h-5 w-5 sm:h-6 sm:w-6 ${
+				index < filled ? 'text-[#facc15]' : 'text-[#e2e8f0]'
+			}`}
+		/>
+	));
+}
+
+export default function CustomerReviewsSection({
+	testimonials: initialTestimonials = [],
+}: CustomerReviewsSectionProps) {
+	const [testimonials, setTestimonials] = useState(initialTestimonials);
+	const [loading, setLoading] = useState(initialTestimonials.length === 0);
 	const [index, setIndex] = useState(0);
-	const count = reviews.length;
+
+	useEffect(() => {
+		if (initialTestimonials.length > 0) {
+			setTestimonials(initialTestimonials);
+			setLoading(false);
+			return;
+		}
+
+		void fetchClientTestimonials()
+			.then((items) =>
+				setTestimonials(items.filter((testimonial) => testimonial.is_featured)),
+			)
+			.finally(() => setLoading(false));
+	}, [initialTestimonials]);
+
+	const count = testimonials.length;
 
 	const go = useCallback(
 		(dir: -1 | 1) => {
-			setIndex((i) => (i + dir + count) % count);
+			setIndex((current) => (current + dir + count) % count);
 		},
 		[count],
 	);
+
+	if (loading) {
+		return (
+			<section
+				className='relative overflow-hidden bg-white px-4 py-16 sm:px-6 sm:py-20 lg:py-24'
+				aria-label='Customer reviews'
+			>
+				<div className='mx-auto max-w-4xl text-center'>
+					<p className='text-sm text-[#64748b]'>Loading reviews...</p>
+				</div>
+			</section>
+		);
+	}
+
+	if (count === 0) {
+		return (
+			<section
+				className='relative overflow-hidden bg-white px-4 py-16 sm:px-6 sm:py-20 lg:py-24'
+				aria-label='Customer reviews'
+			>
+				<div className='mx-auto max-w-4xl text-center'>
+					<p className='text-sm text-[#64748b]'>
+						Customer reviews will appear here once testimonials are published
+						from the dashboard.
+					</p>
+				</div>
+			</section>
+		);
+	}
+
+	const current = testimonials[index];
+	const imageUrl = current.client_image
+		? resolveMediaUrl(current.client_image)
+		: null;
 
 	return (
 		<section
@@ -47,32 +106,46 @@ export default function CustomerReviewsSection() {
 				</button>
 
 				<div className='min-w-0 flex-1 text-center'>
-					<div
-						className='mb-6 flex justify-center gap-1 text-[#facc15]'
-						aria-hidden
-					>
-						{Array.from({ length: 5 }).map((_, i) => (
-							<FaStar key={i} className='h-5 w-5 sm:h-6 sm:w-6' />
-						))}
+					{imageUrl ? (
+						<div className='relative mx-auto mb-5 h-16 w-16 overflow-hidden rounded-full ring-2 ring-[#c1272d]/20'>
+							<Image
+								src={imageUrl}
+								alt=''
+								fill
+								className='object-cover'
+								sizes='64px'
+							/>
+						</div>
+					) : null}
+
+					<div className='mb-6 flex justify-center gap-1' aria-hidden>
+						{renderStars(current.overall_rating)}
 					</div>
 					<blockquote>
 						<p className='font-sans text-base leading-relaxed text-[#334155] sm:text-lg md:leading-8'>
-							{reviews[index].text}
+							{current.testimonial_text}
 						</p>
 						<footer className='mt-6'>
 							<cite className='not-italic'>
 								<span className='font-sans text-base font-bold text-[#0f172a] sm:text-lg'>
-									{reviews[index].name}
+									{current.client_name}
 								</span>
+								{current.company_name || current.designation ? (
+									<span className='mt-1 block text-sm font-normal text-[#64748b]'>
+										{[current.designation, current.company_name]
+											.filter(Boolean)
+											.join(' · ')}
+									</span>
+								) : null}
 							</cite>
 						</footer>
 					</blockquote>
 					<div className='mt-8 flex justify-center gap-2' aria-hidden>
-						{reviews.map((_, i) => (
+						{testimonials.map((testimonial, itemIndex) => (
 							<span
-								key={i}
+								key={testimonial.id}
 								className={
-									i === index
+									itemIndex === index
 										? 'h-2 w-2 rounded-full bg-[#c1272d]'
 										: 'h-2 w-2 rounded-full bg-[#cbd5e1]'
 								}

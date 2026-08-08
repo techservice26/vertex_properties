@@ -1,3 +1,4 @@
+import { PARTNERS_NETWORK } from '@/data/partnersNetwork';
 import { resolveMediaUrl } from '@/lib/media-url';
 import type { PartnersNetworkPartner } from '@/types/partners-network';
 
@@ -39,4 +40,20 @@ export function isUsingFrontendPartnersNetworkLogo(partner: PartnersNetworkPartn
 
 export function sortPartnersNetwork(partners: PartnersNetworkPartner[]) {
 	return [...partners].sort((a, b) => a.id - b.id);
+}
+
+export function getStaticPartnersNetwork(): PartnersNetworkPartner[] {
+	return PARTNERS_NETWORK.map((partner) => ({
+		id: partner.id,
+		company_name: partner.company_name,
+		partner_logo: null,
+	}));
+}
+
+export function resolvePartnersNetwork(apiPartners: PartnersNetworkPartner[]) {
+	if (apiPartners.length === 0) {
+		return getStaticPartnersNetwork();
+	}
+
+	return apiPartners;
 }

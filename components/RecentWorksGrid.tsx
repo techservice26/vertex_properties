@@ -9,6 +9,7 @@ import { fetchClientRecentWorks } from '@/lib/public-recent-work-api';
 import {
 	formatDoneDate,
 	getRecentWorkImageUrl,
+	resolveRecentWorks,
 	sortRecentWorks,
 } from '@/lib/recent-work-utils';
 import { getRichTextPlainText } from '@/lib/rich-text-utils';
@@ -31,29 +32,24 @@ export default function RecentWorksGrid({
 }: Props) {
 	const [works, setWorks] = useState<RecentWork[]>([]);
 	const [loading, setLoading] = useState(true);
-	const [error, setError] = useState('');
 
 	useEffect(() => {
 		let cancelled = false;
 
 		async function loadWorks() {
 			setLoading(true);
-			setError('');
 
 			try {
 				const data = await fetchClientRecentWorks();
 
 				if (!cancelled) {
-					const sorted = sortRecentWorks(data);
+					const sorted = sortRecentWorks(resolveRecentWorks(data));
 					setWorks(limit != null ? sorted.slice(0, limit) : sorted);
 				}
-			} catch (loadError) {
+			} catch {
 				if (!cancelled) {
-					setError(
-						loadError instanceof Error
-							? loadError.message
-							: 'Failed to load recent works.',
-					);
+					const sorted = sortRecentWorks(resolveRecentWorks([]));
+					setWorks(limit != null ? sorted.slice(0, limit) : sorted);
 				}
 			} finally {
 				if (!cancelled) {
@@ -100,17 +96,7 @@ export default function RecentWorksGrid({
 					</p>
 				) : null}
 
-				{error ? (
-					<p className='mt-10 text-center text-sm text-[#c1272d]'>{error}</p>
-				) : null}
-
-				{!loading && !error && works.length === 0 ? (
-					<p className='mt-10 text-center text-sm text-[#64748b]'>
-						No completed projects to show yet.
-					</p>
-				) : null}
-
-				{works.length > 0 ? (
+				{!loading && works.length > 0 ? (
 					<ul className={gridClassName ?? defaultGridClassName}>
 						{works.map((work) => (
 							<li key={work.id}>

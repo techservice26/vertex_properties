@@ -4,34 +4,28 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 
 import { fetchClientOurPartners } from '@/lib/public-our-partner-api';
-import { getOurPartnerLogoUrl } from '@/lib/our-partner-utils';
+import { getOurPartnerLogoUrl, resolveOurPartners } from '@/lib/our-partner-utils';
 import type { OurPartner } from '@/types/our-partner';
 
 export default function PropertyManagementPartnersSection() {
 	const [partners, setPartners] = useState<OurPartner[]>([]);
 	const [loading, setLoading] = useState(true);
-	const [error, setError] = useState('');
 
 	useEffect(() => {
 		let cancelled = false;
 
 		async function loadPartners() {
 			setLoading(true);
-			setError('');
 
 			try {
 				const data = await fetchClientOurPartners();
 
 				if (!cancelled) {
-					setPartners(data);
+					setPartners(resolveOurPartners(data));
 				}
-			} catch (loadError) {
+			} catch {
 				if (!cancelled) {
-					setError(
-						loadError instanceof Error
-							? loadError.message
-							: 'Failed to load partners.',
-					);
+					setPartners(resolveOurPartners([]));
 				}
 			} finally {
 				if (!cancelled) {
@@ -70,19 +64,7 @@ export default function PropertyManagementPartnersSection() {
 					</p>
 				) : null}
 
-				{error ? (
-					<p className='mt-10 text-center text-sm text-[#c1272d] sm:mt-12'>
-						{error}
-					</p>
-				) : null}
-
-				{!loading && !error && partners.length === 0 ? (
-					<p className='mt-10 text-center text-sm text-[#64748b] sm:mt-12'>
-						No software partners to show yet.
-					</p>
-				) : null}
-
-				{partners.length > 0 ? (
+				{!loading && partners.length > 0 ? (
 					<ul className='mt-10 flex flex-wrap items-center justify-center gap-x-10 gap-y-8 sm:mt-12 sm:gap-x-12 md:justify-between md:gap-x-8'>
 						{partners.map((partner) => {
 							const logoUrl = getOurPartnerLogoUrl(partner);

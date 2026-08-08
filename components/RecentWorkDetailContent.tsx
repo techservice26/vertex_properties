@@ -9,6 +9,7 @@ import PageHero from '@/components/PageHero';
 import { RichTextContent } from '@/components/RichTextContent';
 import { fetchClientRecentWork } from '@/lib/public-recent-work-api';
 import {
+	findStaticRecentWork,
 	formatDoneDate,
 	getRecentWorkImageUrl,
 } from '@/lib/recent-work-utils';
@@ -45,7 +46,13 @@ export default function RecentWorkDetailContent({ id }: Props) {
 				}
 			} catch {
 				if (!cancelled) {
-					setNotFoundState(true);
+					const staticWork = findStaticRecentWork(numericId);
+
+					if (staticWork) {
+						setWork(staticWork);
+					} else {
+						setNotFoundState(true);
+					}
 				}
 			} finally {
 				if (!cancelled) {

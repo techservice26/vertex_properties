@@ -1,3 +1,4 @@
+import { OUR_PARTNERS } from '@/data/ourPartners';
 import { resolveMediaUrl } from '@/lib/media-url';
 import type { OurPartner } from '@/types/our-partner';
 
@@ -31,4 +32,20 @@ export function isUsingFrontendPartnerLogo(partner: OurPartner) {
 
 export function sortOurPartners(partners: OurPartner[]) {
 	return [...partners].sort((a, b) => a.id - b.id);
+}
+
+export function getStaticOurPartners(): OurPartner[] {
+	return OUR_PARTNERS.map((partner) => ({
+		id: partner.id,
+		company_name: partner.company_name,
+		partner_logo: null,
+	}));
+}
+
+export function resolveOurPartners(apiPartners: OurPartner[]) {
+	if (apiPartners.length === 0) {
+		return getStaticOurPartners();
+	}
+
+	return apiPartners;
 }

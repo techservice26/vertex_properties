@@ -4,7 +4,10 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 
 import { fetchClientPartnersNetwork } from '@/lib/public-partners-network-api';
-import { getPartnersNetworkLogoUrl } from '@/lib/partners-network-utils';
+import {
+	getPartnersNetworkLogoUrl,
+	resolvePartnersNetwork,
+} from '@/lib/partners-network-utils';
 import type { PartnersNetworkPartner } from '@/types/partners-network';
 
 /** Hollow headline stroke (same pattern as Areas We Serve). */
@@ -37,28 +40,22 @@ function MarqueeStrip({ suffix }: { suffix: string }) {
 export default function TrustedPartnersNetworkSection() {
 	const [partners, setPartners] = useState<PartnersNetworkPartner[]>([]);
 	const [loading, setLoading] = useState(true);
-	const [error, setError] = useState('');
 
 	useEffect(() => {
 		let cancelled = false;
 
 		async function loadPartners() {
 			setLoading(true);
-			setError('');
 
 			try {
 				const data = await fetchClientPartnersNetwork();
 
 				if (!cancelled) {
-					setPartners(data);
+					setPartners(resolvePartnersNetwork(data));
 				}
-			} catch (loadError) {
+			} catch {
 				if (!cancelled) {
-					setError(
-						loadError instanceof Error
-							? loadError.message
-							: 'Failed to load partners network.',
-					);
+					setPartners(resolvePartnersNetwork([]));
 				}
 			} finally {
 				if (!cancelled) {
@@ -97,19 +94,7 @@ export default function TrustedPartnersNetworkSection() {
 					</p>
 				) : null}
 
-				{error ? (
-					<p className='mt-8 text-center text-sm text-[#c1272d] sm:mt-10'>
-						{error}
-					</p>
-				) : null}
-
-				{!loading && !error && partners.length === 0 ? (
-					<p className='mt-8 text-center text-sm text-[#64748b] sm:mt-10'>
-						No network partners to show yet.
-					</p>
-				) : null}
-
-				{partners.length > 0 ? (
+				{!loading && partners.length > 0 ? (
 					<ul className='mt-8 flex flex-wrap items-center justify-center gap-x-8 gap-y-6 sm:mt-10 sm:gap-x-10 md:justify-between md:gap-x-6'>
 						{partners.map((partner) => {
 							const logoUrl = getPartnersNetworkLogoUrl(partner);
